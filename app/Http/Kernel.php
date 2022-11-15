@@ -2,6 +2,8 @@
 
 namespace App\Http;
 
+use App\Jobs\PruneOldPosts;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -23,6 +25,13 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
     ];
 
+
+    protected function schedule(Schedule $schedule)
+    {
+        $schedule->job(new PruneOldPosts)->daily();
+    }
+
+
     /**
      * The application's route middleware groups.
      *
@@ -39,7 +48,6 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
-            // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],

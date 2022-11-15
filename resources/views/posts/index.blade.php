@@ -1,45 +1,47 @@
 @extends('layouts.app')
 
-@section('title') Index @endsection
-@section('content')
-<div class="text-center">
-  <a href="{{route('posts.create')}}" class="mt-4 btn btn-success">Create Post</a>
-</div>
-<table class="table mt-4">
-  <thead>
-    <tr>
-      <th scope="col">#</th>
-      <th scope="col">Title</th>
-      <th scope="col">Posted By</th>
-      <th scope="col">Created At</th>
-      <th scope="col">Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    @foreach ($posts as $post)
-      <tr>
-        <td>{{$post['id']}}</th>
-        <td>{{$post['title']}}</td>
-        <td>{{$post['posted_by']}}</td>
-        <td>{{$post['creation_date']}}</td>
-        <td>
-            <a href="{{route('posts.show', $post['id'])}}" class="btn btn-info">View</a>
-            <!-- {{-- <a href="{{route('posts.show', ['post' =>$post['id']])}}" class="btn btn-info">View</a> --}} -->
-            <a href="{{route('posts.edit', $post['id'])}}" class="btn btn-primary">Edit</a>
-            <form style="display:inline;" method="POST" action="{{route('posts.destroy', $post['id'])}}">
-            @csrf
-            @method('DELETE')
-                <button type='submit' class="btn btn-danger" onclick="myFunction()">Delete</button>
-            </form>
-        </td>
-      </tr>
-    @endforeach
-  </tbody>
-</table>
-<script>
-function myFunction() {
-  confirm("Are you sure,you are going to delete this post!!");
-}
-</script>
+@section('title', 'Home')
 
-@endsection
+
+@section('content')
+
+    <h1 class="mt-5 text-center text-secondary">All Posts</h1>
+    <a class="btn btn-primary" href="{{ route('posts.create') }}">Create Post</a>
+    <table class="table mt-3">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Title</th>
+                <th scope="col">Slug</th>
+                <th scope="col">Posted By</th>
+                <th scope="col">Creation Date</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($posts as $key => $post)
+                <tr>
+                    <th scope="row">{{ $posts->firstItem() + $key }}</th>
+                    <td>{{ $post->title }}</td>
+                    <td>{{ $post->slug }}</td>
+                    <td>{{ $post->user->name }}</td>
+                    <td>{{ $post->updated_at->format('Y/m/d')}}</td>
+                    <td class="d-flex gap-3">
+                        <a class="btn btn-sm btn-secondary" title="show" href="{{ route('posts.show', $post->slug) }}"><i
+                                class="fa-regular fa-eye"></i></a>
+                        <a class="btn btn-sm btn-warning" title="edit" href="{{ route('posts.edit', $post->slug) }}"><i
+                                class="fa-regular fa-pen-to-square"></i></a>
+                        <form method="POST" action="{{ route('posts.destroy', $post->id) }}">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn btn-sm btn-danger" type="submit" onclick="return confirm('are you sure?')"
+                                title="delete"><i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+    {{ $posts->links() }}
+    @endsection

@@ -1,28 +1,50 @@
 <?php
-
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\PostController;
+use Laravel\Socialite\Facades\Socialite;
+use App\Http\Controllers\Post\PostController;
+use App\Http\Controllers\User\UserController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
+Route::resource('posts', PostController::class)->middleware(['auth']);
+Auth::routes();
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/', [PostController::class, 'index'])->name('posts.index')->middleware(['auth']);
+Route::get('deleted/allOldPosts', [PostController::class,'deleteAllOldPosts'])->name('posts.deleteOldPosts')->middleware(['auth']);
+Route::get('deleted/posts', [PostController::class,'deletedPosts'])->name('posts.deleted')->middleware(['auth']);
+Route::delete('deleted/posts/{id}', [PostController::class,'deleteForEver'])->name('posts.deletePermently')->middleware(['auth']);
+Route::post('restore/posts/{id}', [PostController::class,'restorePost'])->name('posts.restore')->middleware(['auth']);
+Route::resource('users', UserController::class)->middleware('auth');
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/auth/github/redirect', function () {
+    return Socialite::driver('github')->redirect();
+})->name('auth.github');
+
+Route::get('/auth/github/callback', function () {
+    $githubUser = Socialite::driver('github')->user();
+    $user = User::updateOrCreate([
+        'email' => $githubUser->email,
+    ], [
+        'name' => $githubUser->nickname,
+        'email' => $githubUser->email,
+    ]);
+    Auth::login($user);
+    return redirect('/');
 });
 
-Route::get('posts', [PostController::class, 'index'])->name('posts.index');
-Route::get('posts/create',[PostController::class, 'create'])->name('posts.create');
-Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show');
-Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
-Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
-Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
-Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
 
+Route::get('/auth/google/redirect', function () {
+    return Socialite::driver('google')->redirect();
+})->name('auth.google');
+
+Route::get('/auth/google/callback', function () {
+    $googleUser = Socialite::driver('google')->user();
+    $user = User::updateOrCreate([
+        'email' => $googleUser->email,
+    ], [
+        'name' => $googleUser->name,
+        'email' => $googleUser->email,
+    ]);
+    Auth::login($user);
+    return redirect('/');
+});

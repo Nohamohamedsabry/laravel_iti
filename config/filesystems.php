@@ -44,6 +44,20 @@ return [
             'throw' => false,
         ],
 
+        'posts' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/images/posts/'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+        
+        'media' => [
+            'driver' => 'local',
+            'root'   => public_path('media'),
+            'url'    => env('APP_URL').'/media',
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
